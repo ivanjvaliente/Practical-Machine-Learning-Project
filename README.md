@@ -1,9 +1,10 @@
 
 ---
-title: "Predicting Physical Activity Using ML"
-author: "Ivan Valiente"
-date: "April 1st 2017"
-output: html_document
+"Predicting Physical Activity Using ML"
+
+"Ivan Valiente"
+
+"April 1st 2017"
 ---
 
 ## Executive Summary
