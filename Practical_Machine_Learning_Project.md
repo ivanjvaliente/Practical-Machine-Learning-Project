@@ -3,9 +3,8 @@
   
 ### April 1st 2017
 
-### April 1st 2017
 
-## Executive Summary
+## 1) Executive Summary
 --------------------
 
 The goal of this project is to build a model that predicts the type of
@@ -44,7 +43,7 @@ This report is split in the three following sections:
 3.  Prediction of the 20 "classe" variables by running the final model
     on the test data set
 
-2) Getting, Cleaning, and Preprocessing Data
+## 2) Getting, Cleaning, and Preprocessing Data
 --------------------------------------------
 
 ### Downloading the data sets
@@ -222,7 +221,7 @@ initial training variables.
     validationPC <- predict(prComp,validation_subset)
     predictionPC <- predict(prComp,testing)
 
-3) Moldel Benchmarking & Model Selection
+## 3) Moldel Benchmarking & Model Selection
 ----------------------------------------
 
 In this section I will assess and compare the accuracy of four different
@@ -370,7 +369,7 @@ From previous results one can observe:
 3.  One also observe that the utilisation of principal components (PC)
     reduces the accuracy for all the models considered
 
-3) Final Model Prediction
+## 3) Final Model Prediction
 -------------------------
 
 Based on the model assessment of the previous section I will run the
