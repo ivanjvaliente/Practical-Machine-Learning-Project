@@ -1,0 +1,238 @@
+---
+title: "Predicting Physical Activity Using ML"
+author: "Ivan Valiente"
+date: "April 1st 2017"
+output: html_document
+---
+
+
+## 1) Executive Summary
+
+The goal of this project is to build a model that predicts the type of "personal activity" using measurements from accelerometers on the belt, forearm, arm, and dumbell of 6 individuals.
+
+The participants in the data colection were asked to perform barbell lifts correctly and incorrectly in 5 
+different ways.
+
+The candidate-models will be trained to predict the "classe" variable in the training set, by using any other 
+variables in the data set.
+
+The final prediction model will be used to predict 20 different test cases provided in the "test" data set.
+
+### The Data Set
+
+The training data for this project are available here:
+
+https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv
+
+The test data are available here:
+
+https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv
+
+More information is available from the website here: http://groupware.les.inf.puc-rio.br/har (see the section on the Weight Lifting Exercise Dataset).
+
+### Report summary
+
+This report is split in the three following sections:
+
+1. Getting and cleaning data
+2. Models benchmarking and final model selection
+3. Prediction of the 20 "classe" variables by running the final model on the test data set 
+
+
+## 2) Getting, Cleaning, and Preprocessing Data
+
+### Downloading the data sets
+
+```{r}
+if(!file.exists("./project")){
+    dir.create("./project")
+    fileUrl1 <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
+
+    download.file(fileUrl1, 
+                 destfile = "./project/pml-training.csv")
+    
+    fileUrl2 <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"
+
+    download.file(fileUrl2, 
+                 destfile = "./project/pml-testing.csv")
+ 
+}
+list.files("./project")
+
+training <- read.csv("./project/pml-training.csv")
+testing <- read.csv("./project/pml-testing.csv")
+
+
+```
+
+### Data cleaning 
+
+The first cleaning step is to remove the colons with non-available (NA) data. The goal of this step is to reduce the risk of getting unexpected behaviors or errors of the models due to missing data. 
+```{r}
+##str(training)
+testing <- testing[,colSums(is.na(testing))==0]
+##names(testing[,colSums(is.na(testing))==0])
+##
+names_training <- names(testing)
+names_training[length(names_training)] <- "classe"
+training <- training[,names_training]
+
+## Checking that there is no colon with missing data in the training set
+names(training[,colSums(is.na(training))>0])
+names(training)
+
+
+```
+As the goal of the model is to predict the type of activity, one should select, among the variables provided in the data set, those that are closely related to motion activity. That means to include in the model only the variables linked to the acceleration measurements, and to exclude all those variables that are not physically related to motion activity.
+
+From the variable names I can infer that the first 7 variables in the data sets  ("X", "user_name",
+"raw_timestamp_part_1", "raw_timestamp_part_2",  "cvtd_timestamp", "new_window", "num_window") are not related to any type of motion the model should predict. So they can be excluded from this model study.
+ 
+
+```{r}
+library(dplyr)
+training <- select(training,-new_window,-cvtd_timestamp,
+                   -raw_timestamp_part_1,-raw_timestamp_part_2,-user_name,-num_window,-X)
+testing <- select(testing, -new_window,-cvtd_timestamp,
+                   -raw_timestamp_part_1,-raw_timestamp_part_2,-user_name,-num_window,-X)
+
+
+```
+
+### Data Splitting
+
+In the following step the initial training set is split in two subsets.
+
+The "traiining_subset" will be used for model training. The "validation_subset" provides the mean to evaluate 
+and compare the different models accuracy.
+
+
+```{r}
+library(caret)
+
+set.seed(7826)
+inTrain = createDataPartition(training$classe, p = 0.7, list = FALSE)
+
+training_subset = training[ inTrain,]
+validation_subset = training[-inTrain,]
+
+## Verification of the randomisation of the two data sub-sets
+
+dim(training_subset)
+dim(validation_subset)
+
+table(training_subset$classe)/dim(training_subset)[1]
+table(validation_subset$classe)/dim(validation_subset)[1]
+
+
+```
+
+### Effects of Preprocessing with Principal Components Analysis
+
+During this project assignment I will also investigate the possibility to reduce the number of variables by removing the variables that are highly correlated. I will test PCA
+preprocessing, by evaluating the impact it has in the models' accuracy. 
+
+For this invastigation I fixed the "thresh" variable at 99% in order to keep in the Principal Component
+variables the maximun of variance of the initial training variables.
+
+```{r}
+##
+numeric_subset <- select(training_subset,-classe)
+
+prComp <- preProcess(numeric_subset, method="pca", thresh = .99)
+prComp
+
+trainPC <- predict(prComp,training_subset)
+
+validationPC <- predict(prComp,validation_subset)
+predictionPC <- predict(prComp,testing)
+```
+
+
+## 3) Moldel Benchmarking & Model Selection
+
+
+In this section I will assess and compare the accuracy of four different models. The accuracy of the models is
+estimated on validation subset.
+
+The models that will be tested are the following: 
+
+1. Random forest decision trees (rf) 
+2. Stochastic gradient boostting trees (gbm)
+3. Support vector machine (svm)
+4. Decision trees with CART (rpart)
+
+For all the tree-based classification models I will use k-fold cross-validation setting k=5.
+
+
+```{r}
+fitControl <- trainControl(method = "cv", number = 5)
+
+
+
+
+
+modFit_rf <- train(classe ~ . , data = training_subset, method="rf", trControl = fitControl)
+
+modFit_rpart <- train(classe ~ . , data = training_subset, method="rpart", trControl = fitControl)
+
+library(gbm)
+modFit_gbm <- train(classe ~ . , data = training_subset, method="gbm", trControl = fitControl,
+                    verbose = FALSE)
+
+library(e1071)
+modFit_svm <- svm(classe ~ ., data = training_subset) 
+
+
+validation_rf <- predict(modFit_rf,validation_subset)
+validation_gbm <- predict(modFit_gbm,validation_subset)
+validation_svm <- predict(modFit_svm,validation_subset)
+validation_rpart <- predict(modFit_rpart,validation_subset)
+
+
+cm_svm <- confusionMatrix(validation_svm,validation_subset$classe)
+cm_rf <- confusionMatrix(validation_rf,validation_subset$classe)
+cm_gbm <- confusionMatrix(validation_gbm,validation_subset$classe)
+cm_rpart <- confusionMatrix(validation_rpart,validation_subset$classe)
+
+
+## model fit with principal components predictors
+
+modFit_rf_PC <- train(classe ~ . , data=trainPC, method="rf", trControl = fitControl)
+modFit_gbm_PC <- train(classe ~ . , data=trainPC, method="gbm", trControl = fitControl,
+                    verbose = FALSE)
+modFit_svm_PC <- svm(classe ~ ., data = trainPC) 
+
+validation_gbm_PC <- predict(modFit_gbm_PC,validationPC)
+validation_svm_PC <- predict(modFit_svm_PC,validationPC)
+validation_rf_PC <- predict(modFit_rf_PC,validationPC)
+
+
+cm_svm_PC <- confusionMatrix(validation_svm_PC,validation_subset$classe)
+cm_rf_PC <- confusionMatrix(validation_rf_PC,validation_subset$classe)
+cm_gbm_PC <- confusionMatrix(validation_gbm_PC,validation_subset$classe)
+
+AccuracySummary <- data.frame( Model = c("rf","gbm","svm","rpart","rf_PC","gbm_PC","svm_PC"),
+                               Accuracy = rbind(cm_rf$overall[1],cm_gbm$overall[1],cm_svm$overall[1],
+                                                cm_rpart$overall[1],cm_rf_PC$overall[1],cm_gbm_PC$overall[1],
+                                                cm_svm_PC$overall[1]))
+print(AccuracySummary)
+
+```
+
+From previous results one can observe:
+
+1. Random forest is the model that provides the highest accuracy among the four models.
+2. Because the accuracy of "rf" is as high as 99.1%, I consider that there is no need of model stacking to improve the accuracy.
+3. One also observe that the utilisation of principal components (PC) reduces the accuracy for all the models considered
+
+## 3) Final Model Prediction
+
+Based on the model assessment of the previous section I will run the "rf" model on the testing set to get the predictions for the final quiz of this MOOC
+
+```{r}
+prediction_results_rf <- predict(modFit_rf,testing)
+quiz_results_rf <- data.frame(problem_id = testing$problem_id, predicted_classe = prediction_results_rf)
+print(quiz_results_rf)
+
+```
