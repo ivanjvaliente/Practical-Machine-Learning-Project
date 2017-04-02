@@ -4,7 +4,7 @@
 ### *April 1st 2017*
 
 
-## 1) Executive Summary
+## Executive Summary
 --------------------
 
 The goal of this project is to build a model that predicts the type of
@@ -43,7 +43,7 @@ This report is split in the three following sections:
 3.  Prediction of the 20 "classe" variables by running the final model
     on the test data set
 
-## 2) Getting, Cleaning, and Preprocessing Data
+## 1) Getting, Cleaning, and Preprocessing Data
 --------------------------------------------
 
 ### Downloading the data sets
@@ -221,7 +221,7 @@ initial training variables.
     validationPC <- predict(prComp,validation_subset)
     predictionPC <- predict(prComp,testing)
 
-## 3) Moldel Benchmarking & Model Selection
+## 2) Moldel Benchmarking & Model Selection
 ----------------------------------------
 
 In this section I will assess and compare the accuracy of four different
