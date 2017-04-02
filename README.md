@@ -1,9 +1,9 @@
 
 # Predicting Physical Activity Using ML
 
-## Ivan Valiente
+### *Ivan Valiente*
 
-## April 1st 2017
+## *April 1st 2017*
 
 
 ## Executive Summary
@@ -17,3 +17,9 @@ The candidate-models will be trained to predict the "classe" variable in the tra
 variables in the data set.
 
 The final prediction model will be used to predict 20 different test cases provided in the "test" data set.
+
+In this repositori you will find the project report in 3 formats:
+
+1.  a R markdown file
+2. a compiled HTML file describing your analysis
+3. a markdown file that is properly displayed here using your broser
