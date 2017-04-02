@@ -1,4 +1,4 @@
-1) Executive Summary
+## Executive Summary
 --------------------
 
 The goal of this project is to build a model that predicts the type of
