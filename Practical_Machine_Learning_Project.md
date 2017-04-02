@@ -1,7 +1,7 @@
 # Predicting Physical Activity Using ML
-### Ivan Valiente
+### *Ivan Valiente*
   
-### April 1st 2017
+### *April 1st 2017*
 
 
 ## 1) Executive Summary
