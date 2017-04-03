@@ -21,5 +21,5 @@ The final prediction model will be used to predict 20 different test cases provi
 In this repositori you will find the project report in 3 formats:
 
 1.  a R markdown file
-2. a compiled HTML file describing your analysis
+2. a compiled HTML file describing your analysis [click here!]( http://htmlpreview.github.com/?https://github.com/ivanjvaliente/Practical-Machine-Learning-Project/blob/master/Practical_Machine_Learning_Project.html)
 3. a compiled markdown file that is properly displayed here using your broser [click here!](https://github.com/ivanjvaliente/Practical-Machine-Learning-Project/blob/master/Practical_Machine_Learning_Project.md)
